@@ -10,6 +10,7 @@ import sys
 
 ignoreCase = False
 mixedCase = False	# set to True if we should try to select mixed case words more often
+includeSimplePunctuation = False
 numWords = 100		# number of words per paragraph to output
 numLessons = 1		# number of lessons to output (1=just a word list)
 topWords = 100		# number of words to choose from
@@ -18,6 +19,7 @@ wordList = []		# tuples of (count, word)
 totalWordCount = 0	# total # of words counted
 
 excludedWords = ['asana', 'actiontag', 'basecamp', 'id', 'll', 'nextaction', 'nextactions', 'st', 've']
+simplePunctuation = ['.', ',', '\'']
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -61,6 +63,9 @@ def generatePracticeWords():
 					break	# found a good one.
 				outputString += wordList[index][1]
 				lastIndex = index
+				if not random.randint(0, 8):
+					p = simplePunctuation[random.randint(0,1)]
+					outputString += p
 			print(outputString + "\n\n")
 	else:	# output just a top word list
 		outputString = ""
@@ -86,8 +91,8 @@ def parseWordList(filelist):
 		if (len(splitLine)>1
 			and int(splitLine[0]) > 0
 			and len(splitLine[1]) > 0
-			and not splitLine[1] in excludedWords
-			and (len(splitLine[1]) > 1 or splitLine[1] in ['a','i'])):	# omit single letters except []
+			and not splitLine[1].lower() in excludedWords
+			and (len(splitLine[1]) > 1 or splitLine[1] in ['a','I'])):	# omit single letters except []
 			count = int(splitLine[0])
 			word = splitLine[1]
 			totalWordCount += count
@@ -102,12 +107,15 @@ if __name__ == '__main__':
 	parser.add_argument('-l', '--lessons', type=int, help='number of paragraphs/lessons to output')
 	parser.add_argument('-m', '--mixedcase', action="store_true", help='select lots of mixed case words')
 	parser.add_argument('-n', '--numwords', type=int, help='number of words per lesson to output')
+	parser.add_argument('-p', '--punctuation', action="store_true", help='include simple punctuation')
 	parser.add_argument('-t', '--topwords', type=int, help='top number of words to choose from')
 	args = parser.parse_args()
 	if args.ignorecase:
 		ignoreCase = args.ignorecase
 	if args.mixedcase:
 		mixedCase = args.mixedcase
+	if args.punctuation:
+		includeSimplePunctuation = args.punctuation
 	if args.numwords:
 		numWords = args.numwords
 	if args.lessons:
